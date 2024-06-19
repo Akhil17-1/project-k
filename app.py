@@ -17,5 +17,15 @@ def collect_log():
     db.logs.insert_one(log_data)
     return jsonify({"message": "Log collected"}), 200
 
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    logs = list(db.logs.find({}, {'_id': 0}))
+    return jsonify(logs)
+
+@app.route('/api/vulnerabilities', methods=['GET'])
+def get_vulnerabilities():
+    vulnerabilities = list(db.vulnerabilities.find({}, {'_id': 0}))
+    return jsonify(vulnerabilities)
+
 if __name__ == '__main__':
     app.run(debug=True)
