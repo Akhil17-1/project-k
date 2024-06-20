@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
+import logging
 
 app = Flask(__name__)
 
-# Configure MongoDB client with SSL disabled
-client = MongoClient('mongodb://localhost:27017/', tlsAllowInvalidCertificates=True)
+# Configure MongoDB client without ssl_cert_reqs
+client = MongoClient('mongodb://localhost:27017/')
 db = client['project_k']
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @app.route('/')
 def home():
@@ -14,18 +18,11 @@ def home():
 @app.route('/collect-log', methods=['POST'])
 def collect_log():
     log_data = request.json
+    # Perform basic processing
+    log_data['processed'] = True
     db.logs.insert_one(log_data)
+    logging.info(f"Log collected from {log_data['source']} at {log_data['timestamp']}")
     return jsonify({"message": "Log collected"}), 200
-
-@app.route('/api/logs', methods=['GET'])
-def get_logs():
-    logs = list(db.logs.find({}, {'_id': 0}))
-    return jsonify(logs)
-
-@app.route('/api/vulnerabilities', methods=['GET'])
-def get_vulnerabilities():
-    vulnerabilities = list(db.vulnerabilities.find({}, {'_id': 0}))
-    return jsonify(vulnerabilities)
 
 if __name__ == '__main__':
     app.run(debug=True)
