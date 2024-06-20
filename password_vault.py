@@ -1,29 +1,33 @@
+# password_vault.py
+import hashlib
+import os
 from cryptography.fernet import Fernet
 
+# Generate a key and instantiate a Fernet instance
 def generate_key():
-    key = Fernet.generate_key()
-    with open("secret.key", "wb") as key_file:
-        key_file.write(key)
+    return Fernet.generate_key()
 
 def load_key():
-    return open("secret.key", "rb").read()
+    return os.environ.get('VAULT_KEY').encode()
 
-def encrypt_password(password):
-    key = load_key()
+def save_password(site_name, password, key):
     f = Fernet(key)
     encrypted_password = f.encrypt(password.encode())
-    return encrypted_password
 
-def decrypt_password(encrypted_password):
-    key = load_key()
+    with open("vault.txt", "a") as vault:
+        vault.write(f"{site_name}:{encrypted_password.decode()}\n")
+
+def get_password(site_name, key):
     f = Fernet(key)
-    decrypted_password = f.decrypt(encrypted_password).decode()
-    return decrypted_password
+    with open("vault.txt", "r") as vault:
+        for line in vault:
+            stored_site_name, encrypted_password = line.strip().split(":")
+            if stored_site_name == site_name:
+                return f.decrypt(encrypted_password.encode()).decode()
+    return None
 
+# Example usage
 if __name__ == "__main__":
-    generate_key()
-    password = "my_secure_password"
-    encrypted_password = encrypt_password(password)
-    print(f"Encrypted: {encrypted_password}")
-    decrypted_password = decrypt_password(encrypted_password)
-    print(f"Decrypted: {decrypted_password}")
+    key = load_key()
+    save_password("example.com", "password123", key)
+    print(get_password("example.com", key))

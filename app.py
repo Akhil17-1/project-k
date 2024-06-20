@@ -4,14 +4,9 @@ from pymongo import MongoClient
 import logging
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-# Configure MongoDB client
-client = MongoClient('mongodb://localhost:27017/')
-db = client['project_k']
-
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# MongoDB and other routes setup remains the same
 
 @app.route('/')
 def home():
@@ -40,7 +35,6 @@ def get_logs_by_type(log_type):
 
 @app.route('/status', methods=['GET'])
 def get_status():
-    # Mock status data for now
     status = [
         {"logType": "Application", "count": 150, "errorCount": 10},
         {"logType": "System", "count": 120, "errorCount": 20},
@@ -51,6 +45,15 @@ def get_status():
         {"logType": "Firewall", "count": 60, "errorCount": 8}
     ]
     return jsonify(status), 200
+
+@app.route('/cves', methods=['GET'])
+def get_cves():
+    cves = [
+        {"id": "CVE-2021-1234", "description": "Sample CVE 1"},
+        {"id": "CVE-2021-5678", "description": "Sample CVE 2"},
+        {"id": "CVE-2021-9102", "description": "Sample CVE 3"}
+    ]
+    return jsonify(cves), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
