@@ -26,5 +26,5 @@ Project K is designed to collect logs from various sources, including Windows Ev
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/yourusername/project-k.git
+   git clone https://github.com/akhil17-1/project-k.git
    cd project-k
