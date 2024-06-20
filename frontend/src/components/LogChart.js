@@ -1,16 +1,40 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Typography } from '@mui/material';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const LogChart = ({ logs }) => {
-  console.log('LogChart logs:', logs);
+  const logCounts = logs.reduce((acc, log) => {
+    const logType = log.source;
+    if (!acc[logType]) {
+      acc[logType] = 0;
+    }
+    acc[logType]++;
+    return acc;
+  }, {});
 
-  const logData = {
-    labels: logs.map(log => log.timestamp),
+  const data = {
+    labels: Object.keys(logCounts),
     datasets: [
       {
         label: 'Log Count',
-        data: logs.map(log => log.count),
+        data: Object.values(logCounts),
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
       },
     ],
@@ -18,10 +42,18 @@ const LogChart = ({ logs }) => {
 
   return (
     <div>
-      <Typography variant="h6" gutterBottom>
-        Log Activity
-      </Typography>
-      <Bar data={logData} />
+      <h2>Log Counts</h2>
+      <Bar
+        data={data}
+        options={{
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        }}
+      />
     </div>
   );
 };

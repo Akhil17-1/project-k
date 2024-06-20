@@ -6,6 +6,7 @@ import win32evtlog
 import win32security
 import win32api
 import os
+from pymongo import MongoClient
 
 # Configuration
 SERVER_URL = "http://localhost:5000/collect-log"
@@ -20,7 +21,11 @@ LOG_FILE_PATHS = {
     "Network": "C:\\path\\to\\network\\logfile.log",  # Update this path to your network log file
     "Application Firewall": "C:\\path\\to\\firewall\\logfile.log",  # Update this path to your application firewall log file
 }
-POLL_INTERVAL = 30  # seconds
+POLL_INTERVAL = 1800  # 30 minutes in seconds
+
+# MongoDB Client
+client = MongoClient('mongodb://localhost:27017/')
+db = client['project_k']
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -99,6 +104,10 @@ def send_logs(log_data):
     except requests.exceptions.RequestException as e:
         logging.error(f"Error sending logs: {e}")
 
+def update_status(status):
+    db.status.drop()
+    db.status.insert_one(status)
+
 def main():
     while True:
         all_logs = []
@@ -132,6 +141,7 @@ def main():
             }
             send_logs(log_data)
         
+        update_status(status)
         logging.info(f"Log collection status: {status}")
         time.sleep(POLL_INTERVAL)
 
