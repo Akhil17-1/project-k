@@ -1,112 +1,82 @@
-
 # Project K
 
-A cybersecurity application for log collection, vulnerability assessment, and threat detection.
-
-## Project Overview
-
-Project K is designed to collect logs from various sources, including Windows Event Viewer, network logs, application firewall logs, user logs, and installation logs. These logs are aggregated and stored in MongoDB for further analysis and visualization.
+## Overview
+Project K is designed to collect, process, and store logs from various sources into a MongoDB database. The project includes scripts for collecting logs from Windows Event Viewer and other sources, processing them, and storing them efficiently.
 
 ## Features
+- Collection of logs from Windows Event Viewer
+- Segregation of logs into various categories for better organization
+- Storage of logs in MongoDB
+- Handling large logs by splitting them into manageable chunks
+- Automated script to start MongoDB, log collector, and agent simultaneously
 
-- Collects logs from Windows Event Viewer (Application, System, Security, User, Install logs).
-- Collects logs from specified log files (Network, Application Firewall).
-- Aggregates logs and stores them in MongoDB.
-- Provides real-time log collection status updates every 30 seconds.
-
-## Setup Instructions
-
-### Prerequisites
-
-- Python 3.x
-- MongoDB
-- Flask
-- MongoDB Compass (optional, for viewing logs)
-
-### Installation
-
-1. **Clone the repository:**
-   ```sh
-   git clone https://github.com/yourusername/project-k.git
+## Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Akhil17-1/project-k.git
    cd project-k
-   ```
+Install dependencies:
 
-2. **Set up a virtual environment:**
-   ```sh
-   python3 -m venv venv
-   venv\Scripts\activate  # For Windows
-   ```
+bash
+Copy code
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+Start MongoDB, log collector, and agent:
 
-3. **Install required dependencies:**
-   ```sh
-   pip install -r requirements.txt
-   ```
+bash
+Copy code
+.\start_all.bat
+Usage
+Collect logs using the agent:
 
-4. **Configure MongoDB:**
-   - Ensure MongoDB is running on `localhost:27017`.
+bash
+Copy code
+python agent.py
+Start the log collector:
 
-### Running the Application
+bash
+Copy code
+python log_collector.py
+Log Types
+The following log types are collected and stored in MongoDB under Project K:
 
-1. **Start the Flask server:**
-   ```sh
-   cd project-k
-   venv\Scripts\activate  # Activate the virtual environment if not already activated
-   python app.py
-   ```
+Application
+System
+Security
+Setup
+Forwarded Events
+CustomApplication
+Network
+Application Firewall
+Issues and Challenges
+Please refer to the challenges.md file for a detailed description of the issues faced and the solutions implemented.
 
-2. **Run the agent script:**
-   ```sh
-   cd agent
-   venv\Scripts\activate  # Activate the virtual environment if not already activated
-   python agent.py
-   ```
+License
+MIT
 
-### Viewing Logs
+css
+Copy code
 
-- Use MongoDB Compass to connect to the MongoDB instance and navigate to the `project_k` database.
-- Open the `logs` collection to view the aggregated logs.
+### Updated Checklist_of_Objectives.md
 
-## Today's Update (2024-06-20)
+```markdown
+# Checklist of Objectives
 
-### New Features and Updates:
+## Completed
+- [x] Setup MongoDB for log storage
+- [x] Develop agent.py for collecting logs from Windows Event Viewer
+- [x] Implement log_collector.py for processing and storing logs
+- [x] Create a script to start MongoDB, log collector, and agent simultaneously
+- [x] Segregate logs into categories for better organization
+- [x] Handle large log files by splitting them into chunks
+- [x] Limit log file size to 100 MB and delete the earliest logs when full
 
-- **Log Collection Enhancement:** 
-  - The agent script has been updated to collect logs from multiple sources, including Windows Event Viewer (Application, System, Security, User, Install logs) and specified log files (Network, Application Firewall).
-  - The agent script now updates the log collection status every 30 seconds, indicating which logs have been collected and which have not been found.
+## In Progress
+- [ ] Optimize log collection process
+- [ ] Implement additional log sources (e.g., IIS, PowerShell)
 
-### Implementation Details:
-
-- **Windows Event Viewer Logs:** 
-  - The agent script collects logs from the Application, System, Security, User, and Install logs using the `win32evtlog` module.
-  - Necessary privileges are set to allow the script to read the Event Logs.
-
-- **Log File Collection:**
-  - The agent script collects logs from specified network and application firewall log files.
-  - Paths to these log files can be configured in the script.
-
-- **Status Updates:**
-  - The agent script provides real-time updates on the log collection status every 30 seconds.
-  - The status includes information on whether logs were collected or not found for each log type.
-
-### Example Output:
-
-- **Flask Server Output:**
-  - Displays messages indicating successful receipt and processing of logs.
-
-- **Agent Script Output:**
-  - Provides real-time status updates on the log collection process.
-  - Logs sent successfully: `[INFO] Logs sent successfully`
-
-- **MongoDB Compass:**
-  - Aggregated logs can be viewed in the `logs` collection within the `project_k` database.
-
-## Contribution
-
-Feel free to contribute to the project by submitting pull requests, reporting issues, or suggesting new features.
-
-## License
-
-This project is licensed under the MIT License.
-```
-
-This updated `README.md` file provides clear instructions on setting up and running the application, along with details about the recent updates and features added today. If you have any further changes or additions, let me know!
+## To Do
+- [ ] Enhance log searching and filtering capabilities
+- [ ] Improve error handling and logging within scripts
+- [ ] Add support for remote log collection
