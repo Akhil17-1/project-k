@@ -1,4 +1,3 @@
-// src/HomeScreen.js
 import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Header from './components/Header';
@@ -34,13 +33,13 @@ const HomeScreen = () => {
   };
 
   const logTypes = [
-    { title: 'Application Logs', image: 'app-logs.jpg' },
-    { title: 'System Logs', image: 'system-logs.jpg' },
-    { title: 'Security Logs', image: 'security-logs.jpg' },
-    { title: 'User Logs', image: 'user-logs.jpg' },
-    { title: 'Install Logs', image: 'install-logs.jpg' },
-    { title: 'Network Logs', image: 'network-logs.jpg' },
-    { title: 'Firewall Logs', image: 'firewall-logs.jpg' },
+    { title: 'Application Logs', image: 'app-logs.jpg', link: '/logs/application' },
+    { title: 'System Logs', image: 'system-logs.jpg', link: '/logs/system' },
+    { title: 'Security Logs', image: 'security-logs.jpg', link: '/logs/security' },
+    { title: 'User Logs', image: 'user-logs.jpg', link: '/logs/user' },
+    { title: 'Install Logs', image: 'install-logs.jpg', link: '/logs/install' },
+    { title: 'Network Logs', image: 'network-logs.jpg', link: '/logs/network' },
+    { title: 'Firewall Logs', image: 'firewall-logs.jpg', link: '/logs/firewall' },
   ];
 
   return (
@@ -53,7 +52,7 @@ const HomeScreen = () => {
         <h2>Logs</h2>
         <ThumbnailGrid>
           {logTypes.map((log, index) => (
-            <Thumbnail key={index} title={log.title} image={`/images/${log.image}`} />
+            <Thumbnail key={index} title={log.title} image={`/images/${log.image}`} link={log.link} />
           ))}
         </ThumbnailGrid>
       </Container>

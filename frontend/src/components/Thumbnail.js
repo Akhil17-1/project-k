@@ -1,6 +1,6 @@
-// src/components/Thumbnail.js
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const ThumbnailContainer = styled.div`
   width: 200px;
@@ -10,6 +10,7 @@ const ThumbnailContainer = styled.div`
   border-radius: 5px;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none;
 
   img {
     width: 100%;
@@ -22,14 +23,16 @@ const ThumbnailContainer = styled.div`
   }
 `;
 
-const Thumbnail = ({ title, image }) => {
+const Thumbnail = ({ title, image, link }) => {
   return (
-    <ThumbnailContainer>
-      <img src={image} alt={title} />
-      <div>
-        <h4>{title}</h4>
-      </div>
-    </ThumbnailContainer>
+    <Link to={link}>
+      <ThumbnailContainer>
+        <img src={image} alt={title} />
+        <div>
+          <h4>{title}</h4>
+        </div>
+      </ThumbnailContainer>
+    </Link>
   );
 };
 

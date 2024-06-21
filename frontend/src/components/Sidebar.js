@@ -1,6 +1,6 @@
-// src/components/Sidebar.js
 import React from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const SidebarContainer = styled.div`
   width: 250px;
@@ -32,6 +32,12 @@ const Sidebar = ({ isOpen, toggleMenu }) => {
   return (
     <SidebarContainer isOpen={isOpen}>
       <MenuList>
+        <MenuItem onClick={toggleMenu}>
+          <Link to="/">Home</Link>
+        </MenuItem>
+        <MenuItem onClick={toggleMenu}>
+          <Link to="/verify-file">Verify File</Link>
+        </MenuItem>
         <MenuItem onClick={toggleMenu}>About Us</MenuItem>
         <MenuItem onClick={toggleMenu}>Scope</MenuItem>
         <MenuItem onClick={toggleMenu}>Further Developments</MenuItem>

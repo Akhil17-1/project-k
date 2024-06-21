@@ -1,4 +1,4 @@
-// logService.js
+// src/logService.js
 import axios from 'axios';
 import DOMPurify from 'dompurify';
 
@@ -17,5 +17,10 @@ export const fetchStatus = async () => {
 
 export const fetchTopCVEs = async () => {
     const response = await axios.get(`${API_BASE_URL}/cves`);
+    return response.data;
+};
+
+export const verifyFile = async (fileUrl) => {
+    const response = await axios.post(`${API_BASE_URL}/verify-file`, { file_url: fileUrl });
     return response.data;
 };

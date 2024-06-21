@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -7,7 +7,7 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 } from 'chart.js';
 
 ChartJS.register(
@@ -19,43 +19,28 @@ ChartJS.register(
   Legend
 );
 
-const LogChart = ({ logs }) => {
-  const logCounts = logs.reduce((acc, log) => {
-    const logType = log.source;
-    if (!acc[logType]) {
-      acc[logType] = 0;
-    }
-    acc[logType]++;
-    return acc;
-  }, {});
-
-  const data = {
-    labels: Object.keys(logCounts),
+const LogChart = ({ data }) => {
+  const chartData = {
+    labels: data.map(log => new Date(log.timestamp).toLocaleString()),
     datasets: [
       {
-        label: 'Log Count',
-        data: Object.values(logCounts),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        label: 'Log Events',
+        data: data.map(log => log.value),
+        backgroundColor: 'rgba(75,192,192,0.6)',
       },
     ],
   };
 
-  return (
-    <div>
-      <h2>Log Counts</h2>
-      <Bar
-        data={data}
-        options={{
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
-        }}
-      />
-    </div>
-  );
+  useEffect(() => {
+    // Ensure the chart is properly destroyed before re-rendering
+    return () => {
+      if (ChartJS.instances[0]) {
+        ChartJS.instances[0].destroy();
+      }
+    };
+  }, [data]);
+
+  return <Bar data={chartData} />;
 };
 
 export default LogChart;
