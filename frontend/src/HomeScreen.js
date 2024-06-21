@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Thumbnail from './components/Thumbnail';
 import CVETicker from './components/CVETicker';
+import StatusComponent from './components/StatusComponent';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -49,6 +50,7 @@ const HomeScreen = () => {
       <Sidebar isOpen={isSidebarOpen} toggleMenu={toggleMenu} />
       <CVETicker />
       <Container>
+        <StatusComponent />
         <h2>Logs</h2>
         <ThumbnailGrid>
           {logTypes.map((log, index) => (

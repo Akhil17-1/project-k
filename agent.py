@@ -11,15 +11,16 @@ from pymongo import MongoClient
 # Configuration
 SERVER_URL = "http://localhost:5000/collect-log"
 EVENT_LOG_SOURCES = {
-    "Application": ["Application"],
-    "System": ["System"],
-    "Security": ["Security"],
-    "User": ["User"],  # Add specific sources for User logs if available
-    "Install": ["Install"],  # Add specific sources for Install logs if available
+    "Application": ["Application", "Application Error", "DellTechHub", "Desktop Window Manager", "FusionService", "MsiInstaller", "SDSSnapshotProcess"],
+    "System": ["System", "Microsoft-Windows-CAPI2", "Microsoft-Windows-Defrag", "Microsoft-Windows-RestartManager", "Software Protection Platform Service", "VSS", "Windows Error Reporting", "Wlclntfy", "edgeupdate"],
+    "Security": ["Security", "SecurityCenter"],
+    "Setup": ["Setup"],
+    "ForwardedEvents": ["ForwardedEvents"],
+    "CustomApplication": ["Alienware SupportAssist Remediation", "logs", "status"],
 }
 LOG_FILE_PATHS = {
-    "Network": "C:\\path\\to\\network\\logfile.log",  # Update this path to your network log file
-    "Application Firewall": "C:\\path\\to\\firewall\\logfile.log",  # Update this path to your application firewall log file
+    "Network": "C:\\Logs\\network.log",
+    "Application Firewall": "C:\\Logs\\firewall.log",
 }
 POLL_INTERVAL = 1800  # 30 minutes in seconds
 
@@ -52,28 +53,32 @@ def set_privilege(privilege_name, enable=True):
 
 def collect_event_logs(source):
     logs = []
-    set_privilege(win32security.SE_SECURITY_NAME, True)  # Enable necessary privilege
-    log_handle = win32evtlog.OpenEventLog(None, source)
-    flags = win32evtlog.EVENTLOG_BACKWARDS_READ | win32evtlog.EVENTLOG_SEQUENTIAL_READ
-    total = win32evtlog.GetNumberOfEventLogRecords(log_handle)
-    while True:
-        events = win32evtlog.ReadEventLog(log_handle, flags, 0)
-        if not events:
-            break
-        for event in events:
-            log_entry = {
-                "EventCategory": event.EventCategory,
-                "TimeGenerated": str(event.TimeGenerated),
-                "SourceName": event.SourceName,
-                "EventID": event.EventID,
-                "EventType": event.EventType,
-                "EventTypeName": EVENT_TYPE_MAPPING.get(event.EventType, "Unknown"),
-                "Message": event.StringInserts
-            }
-            logs.append(log_entry)
-        if len(logs) >= total:
-            break
-    set_privilege(win32security.SE_SECURITY_NAME, False)  # Disable the privilege after use
+    try:
+        set_privilege(win32security.SE_SECURITY_NAME, True)  # Enable necessary privilege
+        log_handle = win32evtlog.OpenEventLog(None, source)
+        flags = win32evtlog.EVENTLOG_BACKWARDS_READ | win32evtlog.EVENTLOG_SEQUENTIAL_READ
+        total = win32evtlog.GetNumberOfEventLogRecords(log_handle)
+        while True:
+            events = win32evtlog.ReadEventLog(log_handle, flags, 0)
+            if not events:
+                break
+            for event in events:
+                log_entry = {
+                    "EventCategory": event.EventCategory,
+                    "TimeGenerated": str(event.TimeGenerated),
+                    "SourceName": event.SourceName,
+                    "EventID": event.EventID,
+                    "EventType": event.EventType,
+                    "EventTypeName": EVENT_TYPE_MAPPING.get(event.EventType, "Unknown"),
+                    "Message": event.StringInserts
+                }
+                logs.append(log_entry)
+            if len(logs) >= total:
+                break
+    except Exception as e:
+        logging.error(f"Error collecting event logs from {source}: {e}")
+    finally:
+        set_privilege(win32security.SE_SECURITY_NAME, False)  # Disable the privilege after use
     return logs
 
 def collect_file_logs(file_path):

@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchLogs } from '../logService';
 import LogChart from './LogChart';
 
 const ApplicationLogs = () => {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:5000/logs/Application')
-      .then(response => setLogs(response.data))
-      .catch(error => console.error('Error fetching logs:', error));
+    const getLogs = async () => {
+      const logsData = await fetchLogs('Application');
+      setLogs(logsData);
+    };
+
+    getLogs();
   }, []);
 
   return (

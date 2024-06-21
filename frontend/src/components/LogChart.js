@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -30,15 +30,6 @@ const LogChart = ({ data }) => {
       },
     ],
   };
-
-  useEffect(() => {
-    // Ensure the chart is properly destroyed before re-rendering
-    return () => {
-      if (ChartJS.instances[0]) {
-        ChartJS.instances[0].destroy();
-      }
-    };
-  }, [data]);
 
   return <Bar data={chartData} />;
 };
