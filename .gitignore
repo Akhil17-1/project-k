@@ -3,3 +3,6 @@ __pycache__/
 venv/
 node_modules/
 .env
+# Ignore log files
+log_collector.log
+Nlog_collector.log
