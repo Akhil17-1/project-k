@@ -1,78 +1,157 @@
-import logging
-from logging.handlers import RotatingFileHandler
+import os
 import time
-from flask import Flask, request
-from pymongo import MongoClient, errors
+import logging
+import requests
+import json
+import win32evtlog
+import win32security
+import win32api
+from pymongo import MongoClient
 
 # Configuration
-LOG_FILE_PATH = 'Nlog_collector.log'  # Updated log file name
-MAX_LOG_SIZE = 100 * 1024 * 1024  # 100 MB
-BACKUP_COUNT = 5
-MAX_BSON_SIZE = 16 * 1024 * 1024  # 16 MB
-MAX_CHUNK_SIZE = MAX_BSON_SIZE - 1024 * 1024  # Further reduced buffer to handle BSON overhead
-
-# Set up logging
-handler = RotatingFileHandler(LOG_FILE_PATH, maxBytes=MAX_LOG_SIZE, backupCount=BACKUP_COUNT)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[handler])
-
-app = Flask(__name__)
+SERVER_URL = "http://localhost:5000/collect-log"
+EVENT_LOG_SOURCES = {
+    "Application": ["Application", "Application Error", "DellTechHub", "Desktop Window Manager", "FusionService", "MsiInstaller", "SDSSnapshotProcess"],
+    "System": ["System", "Microsoft-Windows-CAPI2", "Microsoft-Windows-Defrag", "Microsoft-Windows-RestartManager", "Software Protection Platform Service", "VSS", "Windows Error Reporting", "Wlclntfy", "edgeupdate"],
+    "Security": ["Security", "SecurityCenter"],
+    "Setup": ["Setup"],
+    "ForwardedEvents": ["ForwardedEvents"],
+    "CustomApplication": ["Alienware SupportAssist Remediation", "logs", "status"],
+}
+LOG_FILE_PATHS = {
+    "Network": "C:\\Logs\\network.log",
+    "Application Firewall": "C:\\Logs\\firewall.log",
+}
+POLL_INTERVAL = 1800  # 30 minutes in seconds
 
 # MongoDB Client
 client = MongoClient('mongodb://localhost:27017/')
 db = client['project_k']
 
-def split_logs(log_data, max_size=MAX_CHUNK_SIZE):
-    chunks = []
-    current_chunk = []
-    current_size = 0
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    for log in log_data:
-        log_size = len(str(log).encode('utf-8'))
-        
-        # If adding this log exceeds max size, start a new chunk
-        if current_size + log_size > max_size:
-            chunks.append(current_chunk)
-            current_chunk = [log]
-            current_size = log_size
-        else:
-            current_chunk.append(log)
-            current_size += log_size
-    
-    # Add the last chunk if not empty
-    if current_chunk:
-        chunks.append(current_chunk)
+EVENT_TYPE_MAPPING = {
+    win32evtlog.EVENTLOG_AUDIT_FAILURE: "Audit Failure",
+    win32evtlog.EVENTLOG_AUDIT_SUCCESS: "Audit Success",
+    win32evtlog.EVENTLOG_INFORMATION_TYPE: "Information",
+    win32evtlog.EVENTLOG_WARNING_TYPE: "Warning",
+    win32evtlog.EVENTLOG_ERROR_TYPE: "Error",
+}
 
-    return chunks
-
-@app.route('/collect-log', methods=['POST'])
-def collect_log():
-    logging.info("Received request to /collect-log endpoint")
-    data = request.get_json()
-    log_type = data.get('source')
-    log_data = data.get('logs')
-
-    if log_type and log_data:
-        logging.info(f"Processing logs for type: {log_type}")
-        chunks = split_logs(log_data)
-        collection = db[log_type]
-        for chunk in chunks:
-            try:
-                # Log chunk size for debugging
-                chunk_size = len(str(chunk).encode('utf-8'))
-                logging.info(f"Inserting chunk of size {chunk_size} bytes")
-                
-                collection.insert_one({
-                    'log_data': chunk,
-                    'timestamp': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-                })
-                logging.info(f'Successfully inserted logs for {log_type}')
-            except errors.DocumentTooLarge as e:
-                logging.error(f"Failed to insert logs for {log_type}: {e}")
-        return 'Logs received', 200
+def set_privilege(privilege_name, enable=True):
+    """Set or remove a privilege for the current process."""
+    flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+    hToken = win32security.OpenProcessToken(win32api.GetCurrentProcess(), flags)
+    privilege_id = win32security.LookupPrivilegeValue(None, privilege_name)
+    if enable:
+        new_privilege = [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)]
     else:
-        logging.error('Invalid log data received')
-        return 'Invalid data', 400
+        new_privilege = [(privilege_id, 0)]
+    win32security.AdjustTokenPrivileges(hToken, False, new_privilege)
+    win32api.CloseHandle(hToken)
 
-if __name__ == '__main__':
-    logging.info("Starting log collector service")
-    app.run(port=5000, debug=True)
+def collect_event_logs(source):
+    logs = []
+    try:
+        set_privilege(win32security.SE_SECURITY_NAME, True)  # Enable necessary privilege
+        log_handle = win32evtlog.OpenEventLog(None, source)
+        flags = win32evtlog.EVENTLOG_BACKWARDS_READ | win32evtlog.EVENTLOG_SEQUENTIAL_READ
+        total = win32evtlog.GetNumberOfEventLogRecords(log_handle)
+        while True:
+            events = win32evtlog.ReadEventLog(log_handle, flags, 0)
+            if not events:
+                break
+            for event in events:
+                log_entry = {
+                    "EventCategory": event.EventCategory,
+                    "TimeGenerated": str(event.TimeGenerated),
+                    "SourceName": event.SourceName,
+                    "EventID": event.EventID,
+                    "EventType": event.EventType,
+                    "EventTypeName": EVENT_TYPE_MAPPING.get(event.EventType, "Unknown"),
+                    "Message": event.StringInserts
+                }
+                logs.append(log_entry)
+            if len(logs) >= total:
+                break
+    except Exception as e:
+        logging.error(f"Error collecting event logs from {source}: {e}")
+    finally:
+        set_privilege(win32security.SE_SECURITY_NAME, False)  # Disable the privilege after use
+    return logs
+
+def collect_file_logs(file_path):
+    if not os.path.exists(file_path):
+        logging.error(f"Log file not found: {file_path}")
+        return []
+
+    with open(file_path, "r") as file:
+        logs = file.readlines()
+    
+    file_logs = []
+    for log in logs:
+        file_logs.append({
+            "log": log.strip(),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        })
+    
+    return file_logs
+
+def send_logs(log_data):
+    headers = {'Content-Type': 'application/json'}
+    try:
+        response = requests.post(SERVER_URL, headers=headers, data=json.dumps(log_data))
+        if response.status_code == 200:
+            logging.info("Logs sent successfully")
+        else:
+            logging.error(f"Failed to send logs: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error sending logs: {e}")
+
+def update_status(status):
+    db.status.drop()
+    db.status.insert_one(status)
+
+def main():
+    while True:
+        all_logs = []
+        status = {}
+
+        # Collect event logs
+        for log_type, sources in EVENT_LOG_SOURCES.items():
+            logs_collected = []
+            for source in sources:
+                logs_collected.extend(collect_event_logs(source))
+            if logs_collected:
+                all_logs.extend(logs_collected)
+                status[log_type] = "Collected"
+            else:
+                status[log_type] = "Not found"
+
+        # Collect file logs
+        for log_type, file_path in LOG_FILE_PATHS.items():
+            logs_collected = collect_file_logs(file_path)
+            if logs_collected:
+                all_logs.extend(logs_collected)
+                status[log_type] = "Collected"
+            else:
+                status[log_type] = "Not found"
+
+        if all_logs:
+            chunk_size = 16 * 1024 * 1024  # 16 MB chunk size to avoid BSON size limit
+            for i in range(0, len(all_logs), chunk_size):
+                chunk = all_logs[i:i + chunk_size]
+                log_data = {
+                    "source": "Combined Logs",
+                    "logs": chunk,
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                }
+                send_logs(log_data)
+        
+        update_status(status)
+        logging.info(f"Log collection status: {status}")
+        time.sleep(POLL_INTERVAL)
+
+if __name__ == "__main__":
+    main()

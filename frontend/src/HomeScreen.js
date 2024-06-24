@@ -1,64 +1,74 @@
-import React, { useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+// src/HomeScreen.js
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchStatus } from './logService';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
-import Thumbnail from './components/Thumbnail';
-import CVETicker from './components/CVETicker';
-import StatusComponent from './components/StatusComponent';
-
-const GlobalStyle = createGlobalStyle`
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #141414;
-    color: white;
-  }
-`;
-
-const Container = styled.div`
-  padding: 20px;
-`;
-
-const ThumbnailGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
+import './HomeScreen.css';
 
 const HomeScreen = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [status, setStatus] = useState({});
 
-  const toggleMenu = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  useEffect(() => {
+    const getStatus = async () => {
+      try {
+        const data = await fetchStatus();
+        setStatus(data);
+      } catch (error) {
+        console.error("Error fetching status:", error);
+      }
+    };
 
-  const logTypes = [
-    { title: 'Application Logs', image: 'app-logs.jpg', link: '/logs/application' },
-    { title: 'System Logs', image: 'system-logs.jpg', link: '/logs/system' },
-    { title: 'Security Logs', image: 'security-logs.jpg', link: '/logs/security' },
-    { title: 'User Logs', image: 'user-logs.jpg', link: '/logs/user' },
-    { title: 'Install Logs', image: 'install-logs.jpg', link: '/logs/install' },
-    { title: 'Network Logs', image: 'network-logs.jpg', link: '/logs/network' },
-    { title: 'Firewall Logs', image: 'firewall-logs.jpg', link: '/logs/firewall' },
-  ];
+    getStatus();
+  }, []);
 
   return (
-    <>
-      <GlobalStyle />
-      <Header toggleMenu={toggleMenu} />
-      <Sidebar isOpen={isSidebarOpen} toggleMenu={toggleMenu} />
-      <CVETicker />
-      <Container>
-        <StatusComponent />
-        <h2>Logs</h2>
-        <ThumbnailGrid>
-          {logTypes.map((log, index) => (
-            <Thumbnail key={index} title={log.title} image={`/images/${log.image}`} link={log.link} />
-          ))}
-        </ThumbnailGrid>
-      </Container>
-    </>
+    <div className="home-screen">
+      <Header />
+      <h1>Project K Dashboard</h1>
+      <div className="log-summary">
+        <p>Total Logs Collected: {status.totalLogs}</p>
+        <p>Last Log Collected Time: {status.lastLogCollected}</p>
+        <p>Number of Error Logs: {status.errorLogs}</p>
+        <p>Percentage of Successful Logs: {status.successPercentage}%</p>
+      </div>
+      <div className="log-thumbnails">
+        <Link to="/application-logs">
+          <div className="thumbnail">
+            <h3>Application Logs</h3>
+          </div>
+        </Link>
+        <Link to="/security-logs">
+          <div className="thumbnail">
+            <h3>Security Logs</h3>
+          </div>
+        </Link>
+        <Link to="/system-logs">
+          <div className="thumbnail">
+            <h3>System Logs</h3>
+          </div>
+        </Link>
+        <Link to="/network-logs">
+          <div className="thumbnail">
+            <h3>Network Logs</h3>
+          </div>
+        </Link>
+        <Link to="/firewall-logs">
+          <div className="thumbnail">
+            <h3>Firewall Logs</h3>
+          </div>
+        </Link>
+        <Link to="/install-logs">
+          <div className="thumbnail">
+            <h3>Install Logs</h3>
+          </div>
+        </Link>
+        <Link to="/user-logs">
+          <div className="thumbnail">
+            <h3>User Logs</h3>
+          </div>
+        </Link>
+      </div>
+    </div>
   );
 };
 
