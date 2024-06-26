@@ -1,0 +1,77 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.4, pytest-8.2.2, pluggy-1.5.0
+rootdir: C:\Users\Akhil\project-k
+plugins: mock-3.14.0
+collected 14 items
+
+tests\test_agent.py ....F                                                [ 35%]
+tests\test_app.py F..F                                                   [ 64%]
+tests\test_log_collector.py ....F                                        [100%]
+
+================================== FAILURES ===================================
+_____________________________ test_update_status ______________________________
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x0000019354CCB530>
+
+    def test_update_status(mocker):
+        """Test updating status."""
+        mocker.patch('agent.db.status.drop', return_value=None)
+        mocker.patch('agent.db.status.insert_one', return_value=None)
+        status = {"Application": "Collected"}
+        update_status(status)
+>       agent.db.status.drop.assert_called_once()
+E       NameError: name 'agent' is not defined
+
+tests\test_agent.py:41: NameError
+__________________________________ test_home __________________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_home(client):
+        """Test the home page."""
+        rv = client.get('/')
+>       assert rv.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_app.py:14: AssertionError
+______________________________ test_collect_log _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+mocker = <pytest_mock.plugin.MockerFixture object at 0x0000019354D02450>
+
+    def test_collect_log(client, mocker):
+        """Test the collect log endpoint."""
+        mocker.patch('app.db.collection.insert_many', return_value=None)
+        log_data = {
+            "source": "Test Logs",
+            "logs": [],
+            "timestamp": "2024-06-24T16:00:00Z"
+        }
+        rv = client.post('/collect-log', data=json.dumps(log_data), content_type='application/json')
+>       assert rv.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_app.py:40: AssertionError
+_____________________________ test_update_status ______________________________
+
+mocker = <pytest_mock.plugin.MockerFixture object at 0x00000193533C93A0>
+
+    def test_update_status(mocker):
+        """Test updating status."""
+        mocker.patch('log_collector.db.status.drop', return_value=None)
+        mocker.patch('log_collector.db.status.insert_one', return_value=None)
+        status = {"Application": "Collected"}
+        update_status(status)
+>       log_collector.db.status.drop.assert_called_once()
+E       NameError: name 'log_collector' is not defined
+
+tests\test_log_collector.py:41: NameError
+---------- generated xml file: C:\Users\Akhil\project-k\results.xml -----------
+=========================== short test summary info ===========================
+FAILED tests/test_agent.py::test_update_status - NameError: name 'agent' is n...
+FAILED tests/test_app.py::test_home - assert 404 == 200
+FAILED tests/test_app.py::test_collect_log - assert 404 == 200
+FAILED tests/test_log_collector.py::test_update_status - NameError: name 'log...
+======================== 4 failed, 10 passed in 0.77s =========================
