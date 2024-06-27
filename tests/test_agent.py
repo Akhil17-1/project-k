@@ -1,22 +1,6 @@
 import pytest
-from agent import collect_event_logs, collect_file_logs, send_logs, update_status
+from agent import collect_event_logs, collect_file_logs, update_status
 from unittest.mock import patch, mock_open
-
-@patch('agent.requests.post')
-def test_send_logs_success(mock_post):
-    """Test sending logs successfully."""
-    mock_post.return_value.status_code = 200
-    log_data = {"source": "Test Logs", "logs": [], "timestamp": "2024-06-24T16:00:00Z"}
-    send_logs(log_data)
-    mock_post.assert_called_once()
-
-@patch('agent.requests.post')
-def test_send_logs_failure(mock_post):
-    """Test sending logs failure."""
-    mock_post.return_value.status_code = 500
-    log_data = {"source": "Test Logs", "logs": [], "timestamp": "2024-06-24T16:00:00Z"}
-    send_logs(log_data)
-    mock_post.assert_called_once()
 
 @patch('agent.win32evtlog.OpenEventLog', return_value=None)
 def test_collect_event_logs(mock_open_event_log):

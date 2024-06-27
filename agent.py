@@ -1,22 +1,18 @@
+import os
 import time
-import requests
 import json
 import logging
-import win32evtlog
-import win32security
-import win32api
-import os
+import requests
 from pymongo import MongoClient
+import win32evtlog
+import win32api
+import win32security
 
-# Configuration
-SERVER_URL = "http://localhost:5000/collect-log"
+SERVER_URL = 'http://localhost:5000/collect-log'
 EVENT_LOG_SOURCES = {
-    "Application": ["Application", "Application Error", "DellTechHub", "Desktop Window Manager", "FusionService", "MsiInstaller", "SDSSnapshotProcess"],
-    "System": ["System", "Microsoft-Windows-CAPI2", "Microsoft-Windows-Defrag", "Microsoft-Windows-RestartManager", "Software Protection Platform Service", "VSS", "Windows Error Reporting", "Wlclntfy", "edgeupdate"],
+    "Application": ["Application", "Application Error Reporting"],
+    "System": ["System"],
     "Security": ["Security", "SecurityCenter"],
-    "Setup": ["Setup"],
-    "ForwardedEvents": ["ForwardedEvents"],
-    "CustomApplication": ["Alienware SupportAssist Remediation", "logs", "status"],
 }
 LOG_FILE_PATHS = {
     "Network": "C:\\Logs\\network.log",
@@ -29,7 +25,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['project_k']
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 EVENT_TYPE_MAPPING = {
     win32evtlog.EVENTLOG_AUDIT_FAILURE: "Audit Failure",
@@ -110,8 +106,11 @@ def send_logs(log_data):
         logging.error(f"Error sending logs: {e}")
 
 def update_status(status):
+    logging.info("Dropping status collection")
     db.status.drop()
+    logging.info("Inserting new status")
     db.status.insert_one(status)
+    logging.info("Status updated")
 
 def main():
     while True:

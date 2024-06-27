@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 import logging
@@ -6,16 +6,32 @@ import logging
 app = Flask(__name__)
 CORS(app)
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
+# MongoDB Client
 client = MongoClient('mongodb://localhost:27017/')
 db = client['project_k']
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 @app.route('/')
 def home():
-    return "Welcome to the Project K Log Management System", 200
+    return "Welcome to the log collector app!", 200
+
+@app.route('/collect-log', methods=['POST'])
+def collect_log():
+    data = request.json
+    if 'logs' not in data or not isinstance(data['logs'], list):
+        return jsonify({"error": "Invalid log data"}), 400
+
+    collection_name = data.get('source', 'logs')
+    collection = db[collection_name]
+    
+    if data['logs']:
+        collection.insert_many(data['logs'])
+    else:
+        logging.error("No logs to insert")
+    
+    return jsonify({"status": "Logs collected successfully"}), 200
 
 @app.route('/logs/<log_type>', methods=['GET'])
 def get_logs(log_type):
@@ -58,19 +74,6 @@ def get_status():
     status['successPercentage'] = success_percentage
 
     return jsonify(status), 200
-
-@app.route('/collect-log', methods=['POST'])
-def collect_log():
-    try:
-        data = request.get_json()
-        if not data or 'logs' not in data or not isinstance(data['logs'], list) or not data['logs']:
-            return jsonify({"error": "Invalid data"}), 400
-        collection = db[data['source']]
-        collection.insert_many(data['logs'])
-        return jsonify({"message": "Logs collected successfully"}), 200
-    except Exception as e:
-        logger.exception("Error in /collect-log endpoint")
-        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

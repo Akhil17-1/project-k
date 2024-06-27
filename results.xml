@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="14" time="8.104" timestamp="2024-06-26T15:10:24.927552" hostname="Alien"><testcase classname="tests.test_agent" name="test_send_logs_success" time="0.002" /><testcase classname="tests.test_agent" name="test_send_logs_failure" time="0.001" /><testcase classname="tests.test_agent" name="test_collect_event_logs" time="0.001" /><testcase classname="tests.test_agent" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_agent" name="test_update_status" time="0.046"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2776587861888'&gt;
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="12.110" timestamp="2024-06-27T17:32:58.717502" hostname="Alien"><testcase classname="tests.test_agent" name="test_collect_event_logs" time="0.002" /><testcase classname="tests.test_agent" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_agent" name="test_update_status" time="0.033"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2574928296416'&gt;
 
     def assert_called_once(self):
         """assert that the mock was called only once.
@@ -15,7 +15,7 @@ E           AssertionError: Expected 'drop' to have been called once. Called 0 t
 
 During handling of the above exception, another exception occurred:
 
-mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x00000286793C94F0&gt;
+mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x000002578692C230&gt;
 
     def test_update_status(mocker):
         """Test updating status."""
@@ -26,22 +26,7 @@ mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x00000286793C94F0&gt;
 &gt;       mock_drop.assert_called_once()
 E       AssertionError: Expected 'drop' to have been called once. Called 0 times.
 
-tests\test_agent.py:41: AssertionError</failure></testcase><testcase classname="tests.test_app" name="test_home" time="0.004" /><testcase classname="tests.test_app" name="test_get_logs" time="0.003" /><testcase classname="tests.test_app" name="test_get_status" time="7.393" /><testcase classname="tests.test_app" name="test_collect_log" time="0.001"><failure message="assert 400 == 200&#10; +  where 400 = &lt;WrapperTestResponse streamed [400 BAD REQUEST]&gt;.status_code">client = &lt;FlaskClient &lt;Flask 'app'&gt;&gt;, mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x0000028679899130&gt;
-
-    def test_collect_log(client, mocker):
-        """Test the collect log endpoint."""
-        mocker.patch('app.db.collection.insert_many', return_value=None)
-        log_data = {
-            "source": "Test Logs",
-            "logs": [],
-            "timestamp": "2024-06-24T16:00:00Z"
-        }
-        rv = client.post('/collect-log', data=json.dumps(log_data), content_type='application/json')
-&gt;       assert rv.status_code == 200
-E       assert 400 == 200
-E        +  where 400 = &lt;WrapperTestResponse streamed [400 BAD REQUEST]&gt;.status_code
-
-tests\test_app.py:40: AssertionError</failure></testcase><testcase classname="tests.test_log_collector" name="test_send_logs_success" time="0.001" /><testcase classname="tests.test_log_collector" name="test_send_logs_failure" time="0.001" /><testcase classname="tests.test_log_collector" name="test_collect_event_logs" time="0.001" /><testcase classname="tests.test_log_collector" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_log_collector" name="test_update_status" time="0.037"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2776589246896'&gt;
+tests\test_agent.py:25: AssertionError</failure></testcase><testcase classname="tests.test_app" name="test_home" time="0.003" /><testcase classname="tests.test_app" name="test_get_logs" time="0.003" /><testcase classname="tests.test_app" name="test_get_status" time="11.487" /><testcase classname="tests.test_app" name="test_collect_log" time="0.002" /><testcase classname="tests.test_log_collector" name="test_send_logs_success" time="0.001" /><testcase classname="tests.test_log_collector" name="test_send_logs_failure" time="0.001" /><testcase classname="tests.test_log_collector" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_log_collector" name="test_update_status" time="0.010"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2574955769120'&gt;
 
     def assert_called_once(self):
         """assert that the mock was called only once.
@@ -58,7 +43,7 @@ E           AssertionError: Expected 'drop' to have been called once. Called 0 t
 
 During handling of the above exception, another exception occurred:
 
-mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x00000286799D9130&gt;
+mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x000002578752EC00&gt;
 
     def test_update_status(mocker):
         """Test updating status."""
@@ -69,4 +54,4 @@ mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x00000286799D9130&gt;
 &gt;       mock_drop.assert_called_once()
 E       AssertionError: Expected 'drop' to have been called once. Called 0 times.
 
-tests\test_log_collector.py:41: AssertionError</failure></testcase></testsuite></testsuites>
+tests\test_log_collector.py:35: AssertionError</failure></testcase></testsuite></testsuites>

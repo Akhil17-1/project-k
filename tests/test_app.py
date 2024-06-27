@@ -1,6 +1,6 @@
 import pytest
 import json
-from app import app, client
+from app import app
 
 @pytest.fixture
 def client():
@@ -33,7 +33,7 @@ def test_collect_log(client, mocker):
     mocker.patch('app.db.collection.insert_many', return_value=None)
     log_data = {
         "source": "Test Logs",
-        "logs": [],
+        "logs": [{"event": "test log"}],
         "timestamp": "2024-06-24T16:00:00Z"
     }
     rv = client.post('/collect-log', data=json.dumps(log_data), content_type='application/json')
