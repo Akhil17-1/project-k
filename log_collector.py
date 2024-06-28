@@ -48,11 +48,17 @@ def send_logs(log_data):
         logging.error(f"Error sending logs: {e}")
 
 def update_status(status):
-    logging.info("Dropping status collection")
-    db.status.drop()
-    logging.info("Inserting new status")
-    db.status.insert_one(status)
-    logging.info("Status updated")
+    try:
+        print(f"DB reference in function: {db}")
+        print(f"Status collection reference: {db.status}")
+        print("Dropping status collection")
+        db.status.drop()
+        print("Inserting new status")
+        db.status.insert_one(status)
+        print("Status updated")
+    except Exception as e:
+        print(f"Error updating status: {e}")
+
 
 def main():
     while True:

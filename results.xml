@@ -1,57 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="12.110" timestamp="2024-06-27T17:32:58.717502" hostname="Alien"><testcase classname="tests.test_agent" name="test_collect_event_logs" time="0.002" /><testcase classname="tests.test_agent" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_agent" name="test_update_status" time="0.033"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2574928296416'&gt;
-
-    def assert_called_once(self):
-        """assert that the mock was called only once.
-        """
-        if not self.call_count == 1:
-            msg = ("Expected '%s' to have been called once. Called %s times.%s"
-                   % (self._mock_name or 'mock',
-                      self.call_count,
-                      self._calls_repr()))
-&gt;           raise AssertionError(msg)
-E           AssertionError: Expected 'drop' to have been called once. Called 0 times.
-
-..\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:923: AssertionError
-
-During handling of the above exception, another exception occurred:
-
-mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x000002578692C230&gt;
-
-    def test_update_status(mocker):
-        """Test updating status."""
-        mock_drop = mocker.patch('agent.db.status.drop')
-        mock_insert = mocker.patch('agent.db.status.insert_one')
-        status = {"Application": "Collected"}
-        update_status(status)
-&gt;       mock_drop.assert_called_once()
-E       AssertionError: Expected 'drop' to have been called once. Called 0 times.
-
-tests\test_agent.py:25: AssertionError</failure></testcase><testcase classname="tests.test_app" name="test_home" time="0.003" /><testcase classname="tests.test_app" name="test_get_logs" time="0.003" /><testcase classname="tests.test_app" name="test_get_status" time="11.487" /><testcase classname="tests.test_app" name="test_collect_log" time="0.002" /><testcase classname="tests.test_log_collector" name="test_send_logs_success" time="0.001" /><testcase classname="tests.test_log_collector" name="test_send_logs_failure" time="0.001" /><testcase classname="tests.test_log_collector" name="test_collect_file_logs" time="0.001" /><testcase classname="tests.test_log_collector" name="test_update_status" time="0.010"><failure message="AssertionError: Expected 'drop' to have been called once. Called 0 times.">self = &lt;MagicMock name='drop' id='2574955769120'&gt;
-
-    def assert_called_once(self):
-        """assert that the mock was called only once.
-        """
-        if not self.call_count == 1:
-            msg = ("Expected '%s' to have been called once. Called %s times.%s"
-                   % (self._mock_name or 'mock',
-                      self.call_count,
-                      self._calls_repr()))
-&gt;           raise AssertionError(msg)
-E           AssertionError: Expected 'drop' to have been called once. Called 0 times.
-
-..\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:923: AssertionError
-
-During handling of the above exception, another exception occurred:
-
-mocker = &lt;pytest_mock.plugin.MockerFixture object at 0x000002578752EC00&gt;
-
-    def test_update_status(mocker):
-        """Test updating status."""
-        mock_drop = mocker.patch('log_collector.db.status.drop')
-        mock_insert = mocker.patch('log_collector.db.status.insert_one')
-        status = {"Application": "Collected"}
-        update_status(status)
-&gt;       mock_drop.assert_called_once()
-E       AssertionError: Expected 'drop' to have been called once. Called 0 times.
-
-tests\test_log_collector.py:35: AssertionError</failure></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.608" timestamp="2024-06-28T13:54:10.013909" hostname="Alien"><testcase classname="" name="tests.test_log_collector" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\Akhil\project-k\tests\test_log_collector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_log_collector.py:2: in &lt;module&gt;
+    from log_collector import collect_file_logs, send_logs, update_status
+E   ImportError: cannot import name 'update_status' from 'log_collector' (C:\Users\Akhil\project-k\log_collector.py)</error></testcase></testsuite></testsuites>
