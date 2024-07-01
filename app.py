@@ -23,7 +23,7 @@ def collect_log():
     if 'logs' not in data or not isinstance(data['logs'], list):
         return jsonify({"error": "Invalid log data"}), 400
 
-    collection_name = data.get('source', 'logs')
+    collection_name = data.get('source', 'Combined Logs')
     collection = db[collection_name]
     
     if data['logs']:
@@ -35,10 +35,23 @@ def collect_log():
 
 @app.route('/logs/<log_type>', methods=['GET'])
 def get_logs(log_type):
-    if log_type not in db.list_collection_names():
+    log_type_map = {
+        "Application": "Combined Logs",
+        "System": "Combined Logs",
+        "Security": "Combined Logs",
+        "Network": "Combined Logs",
+        "Firewall": "Combined Logs",
+        "Install": "Combined Logs",
+        "User": "Combined Logs"
+    }
+
+    collection_name = log_type_map.get(log_type, None)
+    if not collection_name or collection_name not in db.list_collection_names():
+        logging.debug(f"Log type {log_type} not found in collections.")
         return jsonify({"error": "Log type not found"}), 404
 
-    logs = list(db[log_type].find())
+    logs = list(db[collection_name].find({"SourceName": {"$regex": log_type}}))
+    logging.debug(f"Fetched {len(logs)} logs for log type {log_type}.")
     for log in logs:
         log['_id'] = str(log['_id'])
     return jsonify(logs), 200

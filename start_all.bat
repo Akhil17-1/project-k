@@ -30,6 +30,9 @@ start "Frontend" cmd /k "cd C:\Users\Akhil\project-k\frontend && npm start"
 rem Wait for frontend to start
 timeout /t 5 /nobreak > NUL
 
+echo Running tests...
+pytest --maxfail=1 --disable-warnings -v
+
 echo All services started. Press Ctrl+C to stop.
 
 rem Keep the script running

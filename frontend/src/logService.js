@@ -8,7 +8,7 @@ export const fetchLogs = async (logType) => {
         return response.data;
     } catch (error) {
         console.error("Error fetching logs:", error);
-        return null;  // Return null or handle it appropriately in the calling code
+        return null;
     }
 };
 
@@ -18,7 +18,7 @@ export const fetchStatus = async () => {
         return response.data;
     } catch (error) {
         console.error("Error fetching status:", error);
-        return null;  // Return null or handle it appropriately in the calling code
+        return null;
     }
 };
 
@@ -28,7 +28,7 @@ export const fetchTopCVEs = async () => {
         return response.data;
     } catch (error) {
         console.error("Error fetching CVEs:", error);
-        return null;  // Return null or handle it appropriately in the calling code
+        return null;
     }
 };
 
@@ -38,6 +38,6 @@ export const verifyFile = async (fileUrl) => {
         return response.data;
     } catch (error) {
         console.error("Error verifying file:", error);
-        return null;  // Return null or handle it appropriately in the calling code
+        return null;
     }
 };
